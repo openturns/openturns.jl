@@ -1,0 +1,11 @@
+name: Linux build
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          docker build .ci_support -t archlinux-julia
+          docker run -v `pwd`:/io archlinux-julia /io/.ci_support/run_docker_build.sh

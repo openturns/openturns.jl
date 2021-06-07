@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/openturns/openturns.jl.svg?branch=master
-    :target: https://travis-ci.org/openturns/openturns.jl
+.. image:: https://github.com/openturns/openturns.jl/actions/workflows/build.yml/badge.svg?branch=master
+    :target: https://github.com/openturns/openturns.jl/actions/workflows/build.yml
 
 =======================
 Julia language bindings
