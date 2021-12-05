@@ -3,19 +3,21 @@ import openturns
 ot = openturns
 
 
-
-
-f = ot.SymbolicFunction("x", "sin(x)")
+inputs = ot.DescriptionBuildDefault(2, "x")
+formula = ot.Description(2)
+formula[0] = "sin(x0)"
+formula[1] = "cos(x1)"
+f = ot.SymbolicFunction(inputs, formula)
 @show f
 @show ot.getInputDimension(f)
 @show ot.getOutputDimension(f)
-@show ot.call(f, [3.14159])
+@show ot.call(f, [3.14, 3.14])
 
 function jlfunc2(X)
     x=X[1]
     y=X[2]
-   z = x+y
-   return [z]
+    z = x+y
+    return [z]
 end
 @show jlfunc2([4., 8.])
 

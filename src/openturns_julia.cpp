@@ -63,11 +63,22 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
 {
   define_collection(mod.add_type<Point>("Point"))
     .constructor<const int_t, const double>()
+    .constructor<const int_t>()
     .method("norm", &Point::norm)
     .method("getDimension", &Point::getDimension);
   mod.set_override_module(jl_base_module);
   mod.method("getindex", [] (const Point& n, const int_t i) { return n[i]; });
   mod.method("setindex!", [] (Point& n, const double x, const int_t i) { n[i] = x; });
+  mod.unset_override_module();
+
+  define_collection(mod.add_type<Description>("Description"))
+    .constructor<const int_t, const String>()
+    .constructor<const int_t>()
+    .method("isBlank", &Description::isBlank)
+    .method("DescriptionBuildDefault", [] (const int_t size, const String value = "Component") { return OT::Description::BuildDefault(size, value); });
+  mod.set_override_module(jl_base_module);
+  mod.method("getindex", [] (const Description& n, const int_t i) { return n[i]; });
+  mod.method("setindex!", [] (Description& n, const String x, const int_t i) { n[i] = x; });
   mod.unset_override_module();
 
   define_object(mod.add_type<Sample>("Sample"))
@@ -80,17 +91,45 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
   mod.method("setindex!", [] (Sample& n, const Point & x, const int_t i) { n[i] = x; });
   mod.unset_override_module();
 
+  define_object(mod.add_type<DistributionImplementation>("DistributionImplementation"));
+  define_object(mod.add_type<ContinuousDistribution>("ContinuousDistribution", jlcxx::julia_base_type<DistributionImplementation>()));
+  define_object(mod.add_type<EllipticalDistribution>("EllipticalDistribution", jlcxx::julia_base_type<ContinuousDistribution>()));
   define_distribution(mod.add_type<Arcsine>("Arcsine"))
     .constructor<const double, const double>();
   define_distribution(mod.add_type<Beta>("Beta"))
     .constructor<const double, const double, const double, const double>();
-  define_distribution(mod.add_type<Normal>("Normal"))
+  define_distribution(mod.add_type<Normal>("Normal", jlcxx::julia_base_type<EllipticalDistribution>()))
     .constructor<const int_t>()
-    .constructor<const double, const double>();
+    .constructor<const double, const double>()
+    .constructor<const Point &, const Point &>();
+  define_object(mod.add_type<Distribution>("Distribution"))
+    .constructor<const DistributionImplementation & >()
+    .constructor<const Normal & >();
 
   define_function(mod.add_type<SymbolicFunction>("SymbolicFunction"))
-    .constructor<const String &, const String &>();
+    .constructor<const String &, const String &>()
+    .constructor<const Description &, const Description &>();
   define_function(mod.add_type<OTJULIA::JuliaFunction>("JuliaFunction"))
     .constructor<const int_t, const int_t, jl_function_t*>();
-}
+  define_object(mod.add_type<Function>("Function"))
+    .constructor<const SymbolicFunction &>();
 
+  define_object(mod.add_type<Less>("Less"));
+  define_object(mod.add_type<Greater>("Greater"));
+  define_object(mod.add_type<ComparisonOperator>("ComparisonOperator"))
+  .constructor<const Less &>()
+  .constructor<const Greater &>();
+
+  define_object(mod.add_type<WeightedExperiment>("WeightedExperiment"));
+  define_object(mod.add_type<MonteCarloExperiment>("MonteCarloExperiment"));
+
+  define_object(mod.add_type<RandomVector>("RandomVector"))
+    .constructor<const Distribution & >();
+  define_object(mod.add_type<CompositeRandomVector>("CompositeRandomVector"))
+    .constructor<const Function &, const RandomVector &>();
+  define_object(mod.add_type<ThresholdEvent>("ThresholdEvent"))
+    .constructor<const RandomVector &, const ComparisonOperator &, const double>();
+
+  define_object(mod.add_type<ProbabilitySimulationAlgorithm>("ProbabilitySimulationAlgorithm"))
+    .constructor<const RandomVector &, const WeightedExperiment &>();
+}

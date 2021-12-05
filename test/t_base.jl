@@ -10,6 +10,12 @@ point[1] = 8.0
 @show point
 @show ot.norm(point)
 
+desc = ot.Description()
+desc = ot.Description(3, "zou")
+desc[1] = "you";
+@show desc[1]
+@show desc
+
 sample = ot.Sample()
 sample = ot.Sample(4, 8)
 @show sample
@@ -18,3 +24,5 @@ sample = ot.Sample(4, 8)
 @show ot.getSize(sample)
 @show ot.getDimension(sample)
 @show ot.computeMean(sample)
+
+
