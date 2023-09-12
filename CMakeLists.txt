@@ -1,8 +1,6 @@
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required (VERSION 3.13)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
-endif ()
+set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
 
 project (openturns.jl)
 
@@ -11,7 +9,7 @@ find_package (OpenTURNS REQUIRED)
 message (STATUS "Found OpenTURNS: ${OPENTURNS_ROOT_DIR} (found version \"${OPENTURNS_VERSION_STRING}\")")
 
 add_library (openturns_julia MODULE src/openturns_julia.cpp src/JuliaEvaluation.cxx src/JuliaFunction.cxx)
-target_link_libraries (openturns_julia OT ${Julia_LIBRARY} JlCxx::cxxwrap_julia)
+target_link_libraries (openturns_julia PRIVATE OT ${Julia_LIBRARY} JlCxx::cxxwrap_julia)
 set_target_properties (openturns_julia PROPERTIES PREFIX "")
 
 set (JULIA_INSTALL_PATH share/julia/stdlib/v1.0 CACHE PATH "Julia install directory")
