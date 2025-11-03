@@ -4,8 +4,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build
         run: |
           docker build .ci_support -t archlinux-julia
-          docker run -v `pwd`:/io archlinux-julia /io/.ci_support/run_docker_build.sh
+          docker run -e MAKEFLAGS='-j4' --rm -v `pwd`:/io archlinux-julia /io/.ci_support/run_docker_build.sh
