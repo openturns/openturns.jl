@@ -92,8 +92,7 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
   mod.unset_override_module();
 
   define_object(mod.add_type<DistributionImplementation>("DistributionImplementation"));
-  define_object(mod.add_type<ContinuousDistribution>("ContinuousDistribution", jlcxx::julia_base_type<DistributionImplementation>()));
-  define_object(mod.add_type<EllipticalDistribution>("EllipticalDistribution", jlcxx::julia_base_type<ContinuousDistribution>()));
+  define_object(mod.add_type<EllipticalDistribution>("EllipticalDistribution", jlcxx::julia_base_type<DistributionImplementation>()));
   define_distribution(mod.add_type<Arcsine>("Arcsine"))
     .constructor<const double, const double>();
   define_distribution(mod.add_type<Beta>("Beta"))
