@@ -1,4 +1,3 @@
-
 #include "openturns_julia.hpp"
 
 #include "JuliaFunction.hxx"
@@ -65,30 +64,30 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
     .constructor<const int_t, const double>()
     .constructor<const int_t>()
     .method("norm", &Point::norm)
-    .method("getDimension", &Point::getDimension);
+    .method("getDimension", &Point::getDimension)
+    .method("getindex", [] (const Point& n, const int_t i) { return n[i-1]; });
   mod.set_override_module(jl_base_module);
-  mod.method("getindex", [] (const Point& n, const int_t i) { return n[i]; });
-  mod.method("setindex!", [] (Point& n, const double x, const int_t i) { n[i] = x; });
+  mod.method("setindex!", [] (Point& n, const double x, const int_t i) { n[i-1] = x; });
   mod.unset_override_module();
 
   define_collection(mod.add_type<Description>("Description"))
     .constructor<const int_t, const String>()
     .constructor<const int_t>()
     .method("isBlank", &Description::isBlank)
-    .method("DescriptionBuildDefault", [] (const int_t size, const String value = "Component") { return OT::Description::BuildDefault(size, value); });
+    .method("DescriptionBuildDefault", [] (const int_t size, const String value = "Component") { return OT::Description::BuildDefault(size, value); })
+    .method("getindex", [] (const Description& n, const int_t i) { return n[i-1]; });
   mod.set_override_module(jl_base_module);
-  mod.method("getindex", [] (const Description& n, const int_t i) { return n[i]; });
-  mod.method("setindex!", [] (Description& n, const String x, const int_t i) { n[i] = x; });
+  mod.method("setindex!", [] (Description& n, const String x, const int_t i) { n[i-1] = x; });
   mod.unset_override_module();
 
   define_object(mod.add_type<Sample>("Sample"))
     .constructor<const int_t, const int_t>()
     .method("getSize", &Sample::getSize)
     .method("getDimension", &Sample::getDimension)
-    .method("computeMean", &Sample::computeMean);
+    .method("computeMean", &Sample::computeMean)
+    .method("getindex", [] (const Sample& n, const int_t i) { return Point(n[i-1]); });
   mod.set_override_module(jl_base_module);
-  mod.method("getindex", [] (const Sample& n, const int_t i) { return Point(n[i]); });
-  mod.method("setindex!", [] (Sample& n, const Point & x, const int_t i) { n[i] = x; });
+  mod.method("setindex!", [] (Sample& n, const Point & x, const int_t i) { n[i-1] = x; });
   mod.unset_override_module();
 
   define_object(mod.add_type<DistributionImplementation>("DistributionImplementation"));
@@ -142,7 +141,6 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
   mod.add_type<ProbabilitySimulationResult>("ProbabilitySimulationResult")
     .method("getProbabilityEstimate", &ProbabilitySimulationResult::getProbabilityEstimate)
     .method("repr", [] (const ProbabilitySimulationResult & p) { return p.__repr__();});
-
 
   define_object(mod.add_type<ProbabilitySimulationAlgorithm>("ProbabilitySimulationAlgorithm"))
     .constructor<const RandomVector &, const WeightedExperiment &>()

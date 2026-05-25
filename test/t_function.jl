@@ -3,10 +3,8 @@ import openturns
 ot = openturns
 
 
-inputs = ot.DescriptionBuildDefault(2, "x")
-formula = ot.Description(2)
-formula[0] = "sin(x0)"
-formula[1] = "cos(x1)"
+inputs = ["x0", "x1"]
+formula = ["sin(x0)", "cos(x1)"]
 f = ot.SymbolicFunction(inputs, formula)
 @show f
 @show ot.getInputDimension(f)
