@@ -119,16 +119,35 @@ JLCXX_MODULE define_julia_module(jlcxx::Module& mod)
   .constructor<const Less &>()
   .constructor<const Greater &>();
 
-  define_object(mod.add_type<WeightedExperiment>("WeightedExperiment"));
-  define_object(mod.add_type<MonteCarloExperiment>("MonteCarloExperiment"));
-
+  // Register CompositeRandomVector first so RandomVector can reference it
+  auto crv_type = define_object(mod.add_type<CompositeRandomVector>("CompositeRandomVector"));
+  // MonteCarloExperiment with default constructor
+  define_object(mod.add_type<MonteCarloExperiment>("MonteCarloExperiment"))
+    .constructor<>();
+  // WeightedExperiment with constructor from MonteCarloExperiment
+  define_object(mod.add_type<WeightedExperiment>("WeightedExperiment"))
+    .constructor<const MonteCarloExperiment &>();
+  // RandomVector with constructors from Distribution and CompositeRandomVector
   define_object(mod.add_type<RandomVector>("RandomVector"))
-    .constructor<const Distribution & >();
-  define_object(mod.add_type<CompositeRandomVector>("CompositeRandomVector"))
-    .constructor<const Function &, const RandomVector &>();
-  define_object(mod.add_type<ThresholdEvent>("ThresholdEvent"))
-    .constructor<const RandomVector &, const ComparisonOperator &, const double>();
+    .constructor<const Distribution & >()
+    .constructor<const CompositeRandomVector &>();
+  // Now add CompositeRandomVector's main constructor (needs RandomVector to be registered)
+  crv_type.constructor<const Function &, const RandomVector &>();
+  // ThresholdEvent constructors dispatch; returns a RandomVector (its parent type)
+  mod.method("ThresholdEvent", [] (const RandomVector & antecedent, const ComparisonOperator & op, double threshold) {
+      return RandomVector(OT::ThresholdEvent(antecedent, op, threshold));
+  });
+
+  // Must register ProbabilitySimulationResult BEFORE it is used as a return type
+  mod.add_type<ProbabilitySimulationResult>("ProbabilitySimulationResult")
+    .method("getProbabilityEstimate", &ProbabilitySimulationResult::getProbabilityEstimate)
+    .method("repr", [] (const ProbabilitySimulationResult & p) { return p.__repr__();});
+
 
   define_object(mod.add_type<ProbabilitySimulationAlgorithm>("ProbabilitySimulationAlgorithm"))
-    .constructor<const RandomVector &, const WeightedExperiment &>();
+    .constructor<const RandomVector &, const WeightedExperiment &>()
+    .method("run", &ProbabilitySimulationAlgorithm::run)
+    .method("getResult", [] (const ProbabilitySimulationAlgorithm & algo) { return algo.getResult(); })
+    .method("setMaximumOuterSampling", &ProbabilitySimulationAlgorithm::setMaximumOuterSampling)
+    .method("setMaximumCoefficientOfVariation", &ProbabilitySimulationAlgorithm::setMaximumCoefficientOfVariation);
 }
